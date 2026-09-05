@@ -2,6 +2,7 @@ name: macOS checks
 
 on:
   push:
+    branches: [main]
   pull_request:
 
 concurrency:
@@ -20,10 +21,22 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+          fetch-depth: 0
       - name: Build with warnings treated as errors
         run: swift build -Xswiftc -warnings-as-errors
       - name: Test financial logic and API contract
-        run: swift test
+        run: swift test --enable-code-coverage
+      - name: Check coverage policy
+        env:
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          python3 -m unittest discover -s scripts -p 'test_*.py'
+          report="$(swift test --show-codecov-path)"
+          if [ -n "$PR_BASE_SHA" ]; then
+            python3 scripts/check-coverage.py "$report" --base "$PR_BASE_SHA"
+          else
+            python3 scripts/check-coverage.py "$report"
+          fi
       - name: Build local app bundle
         run: bash scripts/package.sh
       - name: Upload unsigned development bundle

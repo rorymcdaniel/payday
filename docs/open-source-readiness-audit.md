@@ -1,5 +1,7 @@
 # Open-source readiness audit
 
+Publication update (2026-09-05): the owner authorized public source publication at `https://github.com/rorymcdaniel/payday`. The README screenshot now uses $1,781.52 with synthetic categories. CI enforces the coverage policy in `CONTRIBUTING.md`. Two independent `main` rulesets require PRs and passing checks without bypass, plus owner approval with an explicit administrator PR-only override for owner-authored changes. The assessment below records the original private-staging audit; binary release gates still apply.
+
 **Audited:** 2026-09-05
 
 **Target:** private GitHub staging repository, ready for a later deliberate public-source decision

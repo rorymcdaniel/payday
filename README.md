@@ -4,7 +4,7 @@ A small native Mac app for giving each paycheck a job in YNAB.
 
 Enter what you received, adjust your usual contributions, and confirm. Payday adds those contributions to your categories, preserving the money already there. It runs only while open, with no server, subscription, telemetry, or remote infrastructure.
 
-![Payday’s practice paycheck screen](docs/screenshots/paycheck-v1.1.png)
+![Payday’s practice paycheck screen showing $1,781.52 to allocate across synthetic categories](docs/screenshots/paycheck-v1.1.png)
 
 ## Run it
 

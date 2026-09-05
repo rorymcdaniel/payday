@@ -50,3 +50,13 @@ Keep pull requests focused and explain the user-visible effect. Before requestin
 5. Call out any remaining ambiguity or behavior that could affect a real budget.
 
 Code should favor explicit domain names, small testable seams, and fail-closed behavior over convenience. Avoid adding dependencies unless their value clearly exceeds their privacy and supply-chain cost.
+
+## Required checks and review
+
+Every pull request must pass the `test-and-package` check: a warning-clean build, all existing Swift tests, coverage-policy tests, coverage thresholds, and app packaging. CI runs on every pull request without path filters. A PR must be up to date with `main` before merging.
+
+Run `swift test --enable-code-coverage`, then `python3 scripts/check-coverage.py "$(swift test --show-codecov-path)" --base origin/main` to check coverage locally. The financial core must maintain at least 90% line coverage, the allocation engine at least 95%, and changed executable lines in `PaydayCore`, `AppModel.swift`, and `CentsTextField.swift` at least 80%. New core source files automatically enter this policy. Coverage measures execution, not assertion quality: reviewers must still require meaningful behavioral and failure-path assertions.
+
+Declarative views, application startup, and Keychain adapters are outside the numeric coverage gate. Changes there require documented Practice Mode or platform verification and tests of any extracted logic; do not move financial logic into these files to avoid coverage.
+
+Anyone may propose a change through a fork and pull request. Rory McDaniel (`@rorymcdaniel`) is the sole code owner and approves contributor PRs; new commits dismiss prior approvals. Administrators can explicitly bypass the approval rule through a PR, allowing the owner to merge their own PRs because GitHub prohibits self-approval. GitHub cannot limit this bypass by PR authorship, so the exception is reserved by project policy for owner-authored PRs. A separate ruleset requires a PR, passing checks, and resolved review conversations even for administrators; direct/force pushes and branch deletion are blocked. Contributor PR workflows may require maintainer authorization to run under GitHub's fork security controls.

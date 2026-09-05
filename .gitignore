@@ -6,3 +6,5 @@ dist/
 .env
 *.sqlite*
 *.db*
+__pycache__/
+*.pyc
