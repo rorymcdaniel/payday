@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/rorymcdaniel/ynab-auto-allocate/security/advisories/new
+    about: Report suspected vulnerabilities privately; never open a public issue.
+  - name: Support and data-safety guidance
+    url: https://github.com/rorymcdaniel/ynab-auto-allocate/blob/main/SUPPORT.md
+    about: Read this before sharing diagnostics or financial examples.

@@ -1,0 +1,36 @@
+name: Feature request
+description: Propose a focused improvement to the paycheck-allocation workflow
+title: "[Feature]: "
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Payday intentionally remains a focused companion to YNAB. Use synthetic examples and do not include financial or identifying information.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What part of allocating one paycheck is difficult or unsafe today?
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Desired outcome
+      description: Describe the user-visible behavior, not only an implementation.
+    validations:
+      required: true
+  - type: textarea
+    id: safety
+    attributes:
+      label: Correctness and safety considerations
+      description: Could this affect remote writes, duplicate protection, uncertainty, credentials, privacy, or stored data?
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Optional workarounds or narrower approaches.

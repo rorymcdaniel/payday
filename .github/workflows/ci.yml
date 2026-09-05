@@ -1,0 +1,35 @@
+name: macOS checks
+
+on:
+  push:
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  test-and-package:
+    runs-on: macos-15
+    timeout-minutes: 20
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: Build with warnings treated as errors
+        run: swift build -Xswiftc -warnings-as-errors
+      - name: Test financial logic and API contract
+        run: swift test
+      - name: Build local app bundle
+        run: bash scripts/package.sh
+      - name: Upload unsigned development bundle
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: Payday-macOS
+          path: dist/Payday.app
+          if-no-files-found: error
+          retention-days: 7
