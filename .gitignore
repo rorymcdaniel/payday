@@ -8,3 +8,11 @@ dist/
 *.db*
 __pycache__/
 *.pyc
+android/.gradle/
+android/.kotlin/
+android/**/build/
+android/local.properties
+*.jks
+*.keystore
+*.p12
+signing.properties

@@ -30,3 +30,9 @@ SQLite contents are private by filesystem permissions but not application-encryp
 YNAB does not offer category compare-and-set or a multi-category transaction. Live rereads reduce but cannot eliminate concurrent-edit races. A transaction ID also cannot establish that a human has never allocated the paycheck elsewhere. These limitations must remain visible in documentation and confirmation.
 
 The latest structured assessment is in [docs/security-audit.md](docs/security-audit.md).
+
+## Android personal edition
+
+Android uses the same durable claim, no-retry, and uncertain-write rules, with full synchronous SQLite transactions. Tokens are AES-GCM encrypted with Android Keystore, app opening requires fingerprint/device credentials, and automatic backups are excluded. Portable transfers are validated before an atomic merge; existing history is retained and conflicting claims are rejected. Transferred history does not include allocations performed after the export.
+
+Personal APK signing material is stored outside the repository in `~/.local/share/payday/android-signing/`. Retain it for updates. Tests of transport loss, HTTP retry follow-ups, persistence failure, interrupted imports, duplicate identity, and concurrency are in `android/app/src/test/`; device tests cover the UI and SQLite corruption/reopen behavior. See [Android implementation boundaries](docs/android.md). The earlier audit documents describe the Mac release; they are not an independent audit of the Android port.

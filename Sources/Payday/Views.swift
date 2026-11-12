@@ -5,6 +5,16 @@ private let forest = Color(red: 0.13, green: 0.29, blue: 0.24)
 private let paper = Color(red: 0.97, green: 0.97, blue: 0.94)
 private let muted = Color(red: 0.43, green: 0.47, blue: 0.44)
 
+enum TransferSavePanel {
+    @MainActor static func chooseDestination(practice: Bool) -> URL? {
+        let panel = NSSavePanel()
+        panel.nameFieldStringValue = practice ? "Payday-practice-transfer.json" : "Payday-transfer.json"
+        panel.allowedContentTypes = [.json]
+        panel.message = "Includes your budgets, defaults, draft, and complete allocation history. Your YNAB token is not included."
+        return panel.runModal() == .OK ? panel.url : nil
+    }
+}
+
 struct RootView: View {
     @EnvironmentObject var model: AppModel
     var body: some View {
@@ -546,6 +556,14 @@ struct ConnectionView: View {
                 Text(model.demo ? "Room to practice." : "Your budget. Your Mac.").font(.system(size: 30, weight: .semibold, design: .rounded)).foregroundStyle(forest)
                 Text(model.demo ? "This is a separate sample budget. Try an entire payday, including confirmation, without touching YNAB." : "Connect directly to YNAB. Your access token stays in macOS Keychain; your defaults and history stay on this Mac.")
                     .font(.system(size: 14)).foregroundStyle(muted)
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("Take Payday to Android").font(.headline)
+                    Text("Transfer your defaults, current draft, and full history. Save the file somewhere you can open on your phone, then choose Settings → Import from Mac in Payday. Connect to YNAB separately on your phone.")
+                        .font(.system(size: 12)).foregroundStyle(muted)
+                    Button("Export for Android…") { model.exportForAndroid() }.disabled(model.busy)
+                    Text("The apps do not sync. After moving, allocate on your phone; export again before switching back to using it after a Mac allocation.")
+                        .font(.caption).foregroundStyle(muted)
+                }.padding(18).background(.white, in: RoundedRectangle(cornerRadius: 12))
                 if !model.demo {
                     VStack(alignment: .leading, spacing: 14) {
                         Label(model.connected ? "YNAB connected" : "Connect to YNAB", systemImage: "key.horizontal").font(.headline)

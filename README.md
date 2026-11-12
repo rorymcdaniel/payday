@@ -1,12 +1,18 @@
 # Payday
 
-A small native Mac app for giving each paycheck a job in YNAB.
+A small native Mac and Android app for giving each paycheck a job in YNAB.
 
 Enter what you received, adjust your usual contributions, and confirm. Payday adds those contributions to your categories, preserving the money already there. It runs only while open, with no server, subscription, telemetry, or remote infrastructure.
 
 ![Payday’s practice paycheck screen showing $1,781.52 to allocate across synthetic categories](docs/screenshots/paycheck-v1.1.png)
 
-## Run it
+## Android and Mac-to-phone transfers
+
+A personal Android app is available in `android/`, with automatic decimal entry, fingerprint or screen-lock protection, and the same allocation workflow. Build an installable APK with `bash scripts/package-android.sh`.
+
+On the updated Mac app, choose **Connection → Export for Android…**. On your phone, choose **Settings → Import from Mac**, review the transfer, then connect YNAB separately. Defaults, draft, and full history transfer together; tokens are excluded. The apps do not sync. See [Android installation and transfer instructions](docs/android.md).
+
+## Run on Mac
 
 Requires macOS 15 or later and a Swift 6 toolchain (Xcode or Apple Command Line Tools) to build. No third-party packages are required.
 

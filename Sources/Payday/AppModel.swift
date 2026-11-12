@@ -263,4 +263,16 @@ enum Page: String, CaseIterable { case paycheck = "Paycheck", defaults = "Defaul
             } catch { self.error = error.localizedDescription }
         }
     }
+
+    func exportForAndroid(chooseDestination: @MainActor (Bool) -> URL? = TransferSavePanel.chooseDestination) {
+        guard !busy, let store else { return }
+        do {
+            let data = try PaydayTransfer(state: store.state, practice: demo).encoded()
+            if let url = chooseDestination(demo) {
+                try data.write(to: url, options: .atomic)
+                try FileManager.default.setAttributes([.posixPermissions: 0o600], ofItemAtPath: url.path)
+                notice = "Transfer saved. Open Settings → Import from Mac on Android. Use a fresh export if you allocate another paycheck on this Mac."
+            }
+        } catch { self.error = error.localizedDescription }
+    }
 }

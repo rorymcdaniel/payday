@@ -1,6 +1,6 @@
 # Privacy
 
-Payday is a local macOS application. The project maintainer does not operate a Payday service and does not receive your credentials, budget data, usage, diagnostics, or history.
+Payday is a local macOS and Android application. The project maintainer does not operate a Payday service and does not receive your credentials, budget data, usage, diagnostics, or history.
 
 ## Data the app handles
 
@@ -25,3 +25,9 @@ Disconnecting removes the token from Keychain but deliberately retains defaults 
 Payday retains local configuration and history until you delete them. There is no remote copy for the maintainer to access, return, or delete. YNAB remains the source of truth for the budget and controls retention of data stored by YNAB.
 
 The detailed data-flow assessment and residual risks are recorded in [docs/privacy-audit.md](docs/privacy-audit.md). Report a privacy or security concern using [SECURITY.md](SECURITY.md).
+
+## Android and portable transfers
+
+The Android app stores defaults, the active draft, and history in app-private SQLite, with a separate practice database. Its YNAB token is encrypted using Android Keystore and is not exported. Fingerprint or device-credential authentication gates the app. Screenshots/recent-app previews and automatic cloud/device-transfer backups are disabled. Uninstalling erases its local history. Explicit transfers and backups contain financial data in plain JSON and are retained wherever you save them.
+
+The Android file picker grants access only to your selected import/export files. Transfers contain configuration, draft, and full history, including identifiers and reconciliation notes, and omit credentials. Import is local and makes no YNAB writes. Existing phone history is retained. No synchronization service is used. See [Android storage and transfer details](docs/android.md).

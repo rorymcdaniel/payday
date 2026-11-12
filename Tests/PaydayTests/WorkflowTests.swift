@@ -4,6 +4,31 @@ import PaydayCore
 @testable import Payday
 
 @MainActor final class WorkflowTests: XCTestCase {
+    func testAndroidExportSavesPortableSetupAndHandlesCancelBusyAndWriteFailure() throws {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent("payday-transfer-\(UUID())")
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let store = try Store(directory: directory)
+        try store.update { $0.selectedPlan = DemoAPI.plan; $0.defaults[DemoAPI.plan.id] = DemoAPI.defaults }
+        let model = AppModel(store: store, api: try DemoAPI(directory: directory))
+        let destination = directory.appendingPathComponent("transfer.json")
+        model.exportForAndroid { practice in XCTAssertTrue(practice); return destination }
+        let decoder = JSONDecoder(); decoder.dateDecodingStrategy = .iso8601
+        let transfer = try decoder.decode(PaydayTransfer.self, from: Data(contentsOf: destination))
+        XCTAssertEqual(transfer.state, store.state)
+        XCTAssertEqual(transfer.mode, "practice")
+        XCTAssertNotNil(model.notice)
+        XCTAssertEqual((try FileManager.default.attributesOfItem(atPath: destination.path)[.posixPermissions] as? NSNumber)?.intValue, 0o600)
+        model.notice = nil
+        model.exportForAndroid { _ in nil }
+        XCTAssertNil(model.notice)
+        model.busy = true
+        model.exportForAndroid { _ in XCTFail("Must not export during network work"); return destination }
+        model.busy = false
+        model.exportForAndroid { _ in directory }
+        XCTAssertNotNil(model.error)
+        XCTAssertEqual(store.state.defaults[DemoAPI.plan.id], DemoAPI.defaults)
+    }
+
     func testNativeFieldFormatsEachEditAndRejectsInvalidAmounts() {
         var amounts: [Int64] = []; var valid = true
         let view = CentsTextField(value: 0, digits: 2, large: false, label: "Amount",
