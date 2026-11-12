@@ -12,6 +12,10 @@ No Play Store account, subscription, backend, or public distribution is required
 
 Future updates should be installed over the existing app. Do not uninstall to update: uninstalling deletes local history. Builds use a private signing key in `~/.local/share/payday/android-signing/`. Keep that folder in a protected backup so future APKs can update the same installation. Signing credentials are never included in the APK or repository.
 
+## Start another paycheck
+
+On the Paycheck screen, **New paycheck** appears near the top even when a saved draft already exists. Confirm to replace the draft with your defaults for the current budget month; history is retained. An earlier-month draft stays saved until you confirm, with an explanation beside the action. Start a new paycheck before using Ready to Assign or reviewing an allocation for the current month.
+
 ## Move your Mac data
 
 1. Build the updated Mac app with `bash scripts/package.sh`, then open `dist/Payday.app`.

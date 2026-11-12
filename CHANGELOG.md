@@ -10,6 +10,7 @@ All notable changes to Payday will be documented here. The project follows [Keep
 
 ### Fixed
 
+- Android 1.0.3 exposes **New paycheck** at the top of Paycheck, confirms before replacing a saved draft, and explains how to recover from an earlier-month draft before using Ready to Assign.
 - Android 1.0.1 preserves document-picker results through fingerprint/screen-lock authentication, so Mac import opens its preview after unlocking and backup export resumes correctly.
 
 ### Added

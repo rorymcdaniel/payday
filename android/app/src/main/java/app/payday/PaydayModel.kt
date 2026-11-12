@@ -36,7 +36,7 @@ class PaydayModel @JvmOverloads constructor(application: Application, private va
     val defaults get() = state.defaults[plan?.id].orEmpty()
     val allocated get() = runCatching { Money.total(state.draft?.contributions.orEmpty().map { it.amount }) }.getOrDefault(0)
     val remaining get() = (state.draft?.amount ?: 0) - allocated
-    val canReview get() = connected && !busy && !state.blocked && invalidFields.isEmpty() && remaining == 0L && (state.draft?.amount ?: 0) > 0
+    val canReview get() = connected && !busy && !state.blocked && state.draft?.month == Dates.month() && invalidFields.isEmpty() && remaining == 0L && (state.draft?.amount ?: 0) > 0
     private var opened = false
     fun open() {
         if (opened) return
@@ -95,7 +95,11 @@ class PaydayModel @JvmOverloads constructor(application: Application, private va
         store!!.update { it.copy(draft = Draft(planID = selected.id, contributions = rows, normalContributions = rows, amount = if (practice) 4_123_720 else 0)) }
         sync(); invalidFields.clear(); inputRevision++
     }
-    fun newDraft() = work { createDraft(); page = Page.Paycheck; if (connected) refreshData() }
+    fun newDraft() = work {
+        ensure(!state.blocked, "Reconcile the interrupted allocation in History before starting a new paycheck.")
+        createDraft(); snapshot = null; incomes = emptyList(); page = Page.Paycheck
+        if (connected) refreshData()
+    }
     fun connect(raw: String) {
         val token = raw.trim()
         if (token.isEmpty() || token.length > 4096 || !token.all { it.code in 33..126 }) { error = "Paste only your YNAB token, without spaces or line breaks."; return }
