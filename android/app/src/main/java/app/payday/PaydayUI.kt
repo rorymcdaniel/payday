@@ -177,7 +177,19 @@ private data class Confirmation(val title: String, val message: String, val acti
     val draft = model.state.draft
     val context = LocalContext.current
     LazyColumn(Modifier.fillMaxSize().testTag("paycheck-list"), contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        item { Heading("Give this paycheck a purpose.", "Start with your usual amounts. Make this payday yours.") }
+        item {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Heading("Give this paycheck a purpose.", "Start with your usual amounts. Make this payday yours.")
+                if (model.plan != null && draft != null) {
+                    OutlinedButton({
+                        ask("Start a new paycheck?", "Replace this saved draft with your defaults for budget month ${Dates.month().take(7)}. Your allocation history will be kept.", model::newDraft)
+                    }, enabled = !model.busy && !model.state.blocked) { Text("New paycheck") }
+                    if (draft.month != Dates.month()) {
+                        Text("This saved draft is for ${draft.month.take(7)}. Start a new paycheck for ${Dates.month().take(7)} to use Ready to Assign or review an allocation.", style = MaterialTheme.typography.bodyMedium)
+                    }
+                }
+            }
+        }
         if (model.state.blocked) item { Card { Column(Modifier.padding(18.dp)) { Text("An allocation needs attention.", fontWeight = FontWeight.Bold); Text("Check its saved steps before allocating another paycheck."); TextButton({ model.page = Page.History }) { Text("Open History") } } } }
         if (model.plan == null) item { Button({ model.page = Page.Settings }) { Text("Connect or import your Mac data") } }
         else if (draft == null) item { Button(model::newDraft, enabled = !model.busy && !model.state.blocked) { Text("New paycheck") } }
@@ -190,7 +202,7 @@ private data class Confirmation(val title: String, val message: String, val acti
                             Column { Text("ALLOCATED", style = MaterialTheme.typography.labelSmall); Text(model.money(model.allocated), style = MaterialTheme.typography.titleLarge) }
                             Column(horizontalAlignment = Alignment.End) { Text(if (model.remaining < 0) "OVER ALLOCATED" else "REMAINING", style = MaterialTheme.typography.labelSmall); Text(model.money(kotlin.math.abs(model.remaining)), style = MaterialTheme.typography.titleLarge, color = if (model.remaining < 0) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary) }
                         }
-                        OutlinedButton(model::useReady, enabled = !model.busy && model.connected && !model.state.blocked, modifier = Modifier.fillMaxWidth()) { Text("Use Ready to Assign") }
+                        OutlinedButton(model::useReady, enabled = !model.busy && model.connected && !model.state.blocked && draft.month == Dates.month(), modifier = Modifier.fillMaxWidth()) { Text("Use Ready to Assign") }
                         HorizontalDivider()
                         TextButton({
                             val date = runCatching { LocalDate.parse(draft.date) }.getOrDefault(LocalDate.now())
@@ -208,7 +220,6 @@ private data class Confirmation(val title: String, val message: String, val acti
                     var menu by remember { mutableStateOf(false) }
                     Box { IconButton({ menu = true }, enabled = !model.busy) { Icon(Icons.Default.MoreVert, "Paycheck actions") }
                         DropdownMenu(menu, { menu = false }) {
-                            DropdownMenuItem(text = { Text("Start a new paycheck") }, onClick = { menu = false; ask("Start over?", "Your current draft will be replaced with your defaults.", model::newDraft) })
                             DropdownMenuItem(text = { Text("Save allocation as defaults") }, enabled = model.invalidFields.isEmpty(), onClick = { menu = false; ask("Save these defaults?", "This replaces your usual category list and amounts.", model::saveDefaults) })
                             model.incomes.forEach { income -> DropdownMenuItem(text = { Text("Link ${income.date} · ${income.name}\n${model.money(income.amount)}") }, onClick = { menu = false; model.chooseIncome(income) }) }
                         }

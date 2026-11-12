@@ -31,6 +31,55 @@ import java.util.UUID
 @RunWith(AndroidJUnit4::class)
 class WorkflowTests {
     @get:Rule val compose = createAndroidComposeRule<ComponentActivity>()
+    @Test fun previousMonthDraftCanBeReplacedFromVisiblePaycheckAction() = newPaycheckFlow(stale = true)
+    @Test fun currentMonthDraftCanBeReplacedFromVisiblePaycheckAction() = newPaycheckFlow(stale = false)
+
+    private fun newPaycheckFlow(stale: Boolean) {
+        val app = ApplicationProvider.getApplicationContext<Application>()
+        app.deleteDatabase("practice.sqlite")
+        File(app.noBackupFilesDir, "practice-budget.json").delete()
+        val month = if (stale) java.time.LocalDate.now().minusMonths(1).withDayOfMonth(1).toString() else Dates.month()
+        val row = DemoAPI.defaults.first()
+        val original = Draft(planID = DemoAPI.plan.id, month = month, reference = "Saved paycheck", amount = 123_450,
+            contributions = listOf(row.copy(amount = 123_450)))
+        SQLiteStore(app, true).apply {
+            update { it.copy(selectedPlan = DemoAPI.plan, defaults = mapOf(DemoAPI.plan.id to DemoAPI.defaults), draft = original) }
+            close()
+        }
+        lateinit var model: PaydayModel
+        compose.runOnUiThread {
+            model = PaydayModel(app, practiceOnly = true)
+            compose.activity.viewModelStore.put("new-paycheck-test", model)
+            model.open()
+        }
+        compose.waitUntil(10_000) { !model.busy && model.state.draft != null }
+        compose.runOnIdle { model.unlocked = true }
+        compose.setContent { PaydayTheme { PaydaySession(model) {} } }
+        val before = model.state
+        // This must be discoverable without opening the Contributions overflow menu or scrolling.
+        compose.onNodeWithText("New paycheck").assertIsDisplayed().assertIsEnabled().performClick()
+        compose.onNodeWithText("Start a new paycheck?").assertIsDisplayed()
+        compose.onNodeWithText("Cancel").performClick()
+        compose.runOnIdle { assertEquals(before, model.state) }
+        if (stale) {
+            compose.onNodeWithText("Use Ready to Assign").performScrollTo().assertIsNotEnabled()
+            compose.runOnIdle { assertFalse(model.canReview) }
+        }
+        compose.onNodeWithText("New paycheck").performScrollTo()
+        compose.onNodeWithText("New paycheck").performClick()
+        compose.onNodeWithText("Confirm").performClick()
+        compose.waitUntil(10_000) { !model.busy && model.state.draft!!.id != original.id }
+        compose.runOnIdle {
+            assertEquals(Dates.month(), model.state.draft!!.month)
+            assertEquals(before.history, model.state.history)
+            assertEquals(before.defaults, model.state.defaults)
+            assertNull(model.error)
+        }
+        compose.onNodeWithText("Use Ready to Assign").performScrollTo().assertIsEnabled().performClick()
+        compose.waitUntil(10_000) { !model.busy && model.state.draft!!.usesReadyToAssign == true }
+        compose.runOnIdle { assertNull(model.error); assertEquals(model.snapshot!!.readyToAssign, model.state.draft!!.amount) }
+    }
+
     @Test fun importResultSurvivesLockAndUnlock() = documentPickerRoundTrip()
     @Test fun importResultArrivingAfterUnlockIsHandled() = documentPickerRoundTrip(deliverAfterUnlock = true)
     @Test fun canceledPickerDoesNotImport() = documentPickerRoundTrip(canceled = true)
