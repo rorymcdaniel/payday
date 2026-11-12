@@ -38,3 +38,9 @@ Default changes and paycheck changes use distinct methods and store paths. `Draf
 Using Ready to Assign fetches a fresh conservative snapshot and fills the draft's amount, clearing any single-deposit link. It records the funding source and a dated reference, with a noncolliding suffix for additional RTA allocations that day. Reading it again in the same draft preserves identity. The normal durable claim, sufficient-funds checks, explicit confirmation, and uncertain-write recovery remain mandatory.
 
 Practice mode constructs a local `DemoAPI` instead of a network client and never accesses Keychain. An optional `--demo-directory PATH` permits isolated UI verification; `--snapshot PATH` captures the app's own native view in practice mode without reading other windows or requiring screen recording.
+
+## Android and portable handoff
+
+`android/` is a native Kotlin/Compose app with a separate port of the financial core, SQLite adapter, Android Keystore token vault, and YNAB HTTP adapter. `docs/android.md` describes its lifecycle and security boundaries. Core behavior is tested independently on each platform.
+
+`PaydayTransfer` exports a versioned `app.payday.transfer` envelope with ISO 8601 timestamps, source, mode, and the complete `AppState`. It never reads Keychain. The fixture `fixtures/mac-transfer-v1.json` must remain equivalent to Swift’s encoder output and readable by Android. Android validates amounts, identities, history targets, schema, and mode before confirming an atomic import. It retains local claims and rejects conflicting identities rather than replacing history.

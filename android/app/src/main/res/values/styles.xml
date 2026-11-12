@@ -1,0 +1,8 @@
+<resources>
+    <style name="Theme.Payday" parent="android:style/Theme.Material.Light.NoActionBar">
+        <item name="android:fontFamily">sans</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:colorAccent">#214A3D</item>
+        <item name="android:windowBackground">#F7F7F0</item>
+    </style>
+</resources>
