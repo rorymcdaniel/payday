@@ -115,8 +115,9 @@ struct PaycheckView: View {
                         Text("Start with your usual amounts. Make this payday yours.").font(.system(size: 13)).foregroundStyle(muted)
                     }
                     Spacer()
+                    Button { replaceDraft = true } label: { Label("New paycheck", systemImage: "plus") }
+                        .buttonStyle(.bordered).disabled(model.blocked)
                     Menu {
-                        Button("Start a new paycheck…") { replaceDraft = true }
                         Button("Save this allocation as defaults…") { saveDefaults = true }.disabled(!model.invalidFields.isEmpty)
                         Menu("Link a YNAB deposit") {
                             ForEach(model.incomes) { income in
@@ -127,6 +128,12 @@ struct PaycheckView: View {
                     }
                     label: { Image(systemName: "ellipsis.circle").font(.title3) }.menuStyle(.borderlessButton).fixedSize()
                 }.padding(.bottom, 24)
+                if draft.month != Dates.month() {
+                    Label("This saved draft is for \(draft.month.prefix(7)). Start a new paycheck for \(Dates.month().prefix(7)) to use Ready to Assign or review an allocation.", systemImage: "calendar.badge.exclamationmark")
+                        .font(.system(size: 12)).foregroundStyle(forest).padding(12)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(forest.opacity(0.06), in: RoundedRectangle(cornerRadius: 8)).padding(.bottom, 16)
+                }
                 paycheckCard(draft)
                 HStack {
                     Text("This paycheck’s contributions").font(.system(size: 15, weight: .semibold))
@@ -171,9 +178,9 @@ struct PaycheckView: View {
             .confirmationDialog("Replace these contributions with your defaults?", isPresented: $resetAmounts, titleVisibility: .visible) {
                 Button("Use default amounts") { model.resetContributions() }
             } message: { Text("This replaces paycheck-specific category changes. The amount to allocate, date, and reference stay the same.") }
-            .confirmationDialog("Replace the saved draft with your defaults?", isPresented: $replaceDraft, titleVisibility: .visible) {
-                Button("Start over", role: .destructive) { model.newDraft() }
-            } message: { Text("Temporary edits will be discarded. Nothing changes in YNAB.") }
+            .confirmationDialog("Start a new paycheck?", isPresented: $replaceDraft, titleVisibility: .visible) {
+                Button("Start a new paycheck", role: .destructive) { model.newDraft() }.disabled(model.blocked)
+            } message: { Text("Replace this saved draft with your defaults for budget month \(Dates.month().prefix(7)). Temporary edits will be discarded. Your allocation history will be kept. Nothing changes in YNAB.") }
             .confirmationDialog("Use these amounts for future paychecks?", isPresented: $saveDefaults, titleVisibility: .visible) {
                 Button("Save as defaults") { model.saveAllDefaults() }
             } message: { Text("This replaces your normal allocation, including its category list.") }
@@ -206,7 +213,7 @@ struct PaycheckView: View {
                     .textFieldStyle(.plain).font(.system(size: 12)).frame(maxWidth: 180).help("A unique name for this paycheck on this date, such as your employer. Used to prevent duplicates.")
                 Spacer()
                 Button { model.useReadyToAssign() } label: { Label("Use Ready to Assign", systemImage: "tray.and.arrow.down") }
-                    .font(.system(size: 11)).buttonStyle(.bordered).disabled(model.blocked)
+                    .font(.system(size: 11)).buttonStyle(.bordered).disabled(model.blocked || draft.month != Dates.month())
                     .help("Read the currently available amount across your budget, including future-month commitments. This does not apply an allocation.")
             }
         }.padding(20).background(.white, in: RoundedRectangle(cornerRadius: 14))

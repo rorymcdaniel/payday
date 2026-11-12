@@ -44,6 +44,14 @@ The optional practice-only `--snapshot /absolute/output.png` captures the app's 
 
 ## Packaging
 
+### macOS 1.1.1 paycheck guidance (2026-11-12)
+
+- The regression suite reproduced enabled review for an earlier-month draft, draft replacement despite unresolved history, and a stale snapshot remaining after refresh failure. All three paths pass after the fix; all 63 Swift tests and the six coverage-policy tests pass.
+- Warning-clean build, release packaging, signature verification, and financial-core coverage thresholds pass.
+- Inspected the packaged app in an isolated Practice Mode directory: **New paycheck** is visible beside the heading; its confirmation identifies the current month and explains draft replacement and history retention. Cancel returns to the unchanged draft.
+- Inspected the [current-month screen](screenshots/paycheck-v1.1.1.png) and an [earlier-month draft](screenshots/paycheck-earlier-month-v1.1.1.png). Both captures contain only synthetic practice data. The earlier-month screen displays guidance and disables Ready to Assign and review.
+- Workflow tests verify that starting a new paycheck retains defaults and completed history, targets the current month, and enables a subsequent Ready to Assign read. Busy/interrupted states retain the saved draft; failed refresh clears the prior snapshot. No allocation was applied during this verification.
+
 `bash scripts/package.sh` produces `dist/Payday.app`, including a code-drawn icon, valid Info.plist, and an ad-hoc signature. `codesign --verify --deep --strict` and `plutil -lint` pass. `vtool -show-build` reports a macOS 15 minimum deployment target.
 
 ## Remaining external validation
