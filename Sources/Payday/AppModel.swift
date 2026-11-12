@@ -27,7 +27,7 @@ enum Page: String, CaseIterable { case paycheck = "Paycheck", defaults = "Defaul
     var remaining: Int64 { (state.draft?.amount ?? 0) - allocated }
     var blocked: Bool { state.history.contains(where: \.blocksWrites) }
     var canReview: Bool {
-        connected && !busy && !blocked && invalidFields.isEmpty && remaining == 0 && (state.draft?.amount ?? 0) > 0
+        connected && !busy && !blocked && state.draft?.month == Dates.month() && invalidFields.isEmpty && remaining == 0 && (state.draft?.amount ?? 0) > 0
     }
 
     init() {
@@ -124,7 +124,13 @@ enum Page: String, CaseIterable { case paycheck = "Paycheck", defaults = "Defaul
         try store.update { $0.draft = draft }; sync(); invalidFields = []
         contributionInputRevision += 1; paycheckInputRevision += 1
     }
-    func newDraft() { work { try self.createDraft(); self.page = .paycheck; try await self.refreshData() } }
+    func newDraft() {
+        work {
+            guard !self.blocked else { throw AppError("Reconcile the interrupted allocation in History before starting a new paycheck.") }
+            try self.createDraft(); self.snapshot = nil; self.incomes = []; self.page = .paycheck
+            try await self.refreshData()
+        }
+    }
     func connect(_ rawToken: String) {
         let token = rawToken.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !token.isEmpty else { error = "Paste your personal access token first."; return }

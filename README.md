@@ -4,7 +4,7 @@ A small native Mac and Android app for giving each paycheck a job in YNAB.
 
 Enter what you received, adjust your usual contributions, and confirm. Payday adds those contributions to your categories, preserving the money already there. It runs only while open, with no server, subscription, telemetry, or remote infrastructure.
 
-![Payday’s practice paycheck screen showing $1,781.52 to allocate across synthetic categories](docs/screenshots/paycheck-v1.1.png)
+![Payday’s practice paycheck screen with the visible New paycheck action and synthetic category amounts](docs/screenshots/paycheck-v1.1.1.png)
 
 ## Android and Mac-to-phone transfers
 
@@ -49,6 +49,8 @@ swift test
 Changes in the Paycheck screen are temporary. Default changes update unadjusted rows in the current draft automatically, while paycheck-specific adjustments and omissions are preserved. New defaults are included immediately; the saved order carries through the paycheck, review, and new history entries. One-off rows follow the default rows. Existing history retains its original recorded order and amounts.
 
 The visible **Use default amounts** button restores the complete default allocation without clearing the amount to allocate or its reference. A row’s menu can make its amount the new default, or the paycheck menu can explicitly replace the whole default allocation.
+
+To start another paycheck, click **New paycheck** beside the heading. Confirm to replace the saved draft with your defaults for the current budget month; history is retained. Earlier-month drafts display guidance and disable **Use Ready to Assign** and review until you start a current-month paycheck. Canceling keeps the saved draft unchanged. An interrupted allocation must be reconciled in History before starting another paycheck.
 
 **Use Ready to Assign** only fills in the amount; you must still balance, review, and confirm. Each new RTA allocation gets a dated reference, with a numbered suffix for additional allocations that day. Reusing the button within a draft keeps the same identity. It does not create or duplicate deposits, and it cannot identify assignments you made outside Payday. Linking one specific deposit remains available in the paycheck’s menu under **Link a YNAB deposit**.
 
